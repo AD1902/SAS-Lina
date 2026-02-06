@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pregunta MUY seria 💘</title>
+  <style>
+    :root { --bg1:#0f172a; --bg2:#111827; --txt:#e5e7eb; --muted:#94a3b8; }
+    * { box-sizing: border-box; }
+    body{
+      margin:0; min-height:100vh; display:grid; place-items:center;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(1200px 600px at 20% 10%, #fb7185 0%, transparent 60%),
+                  radial-gradient(900px 500px at 80% 80%, #60a5fa 0%, transparent 55%),
+                  linear-gradient(180deg, var(--bg1), var(--bg2));
+      color: var(--txt);
+      overflow:hidden;
+    }
+    .card{
+      width:min(720px, 92vw);
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 18px;
+      padding: 28px;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.45);
+      position: relative;
+      z-index: 2;
+    }
+    h1{ margin: 0 0 8px; font-size: clamp(24px, 3.2vw, 34px); }
+    p{ margin: 8px 0; color: var(--muted); font-size: 16px; line-height:1.4; }
+    .big{
+      margin-top: 14px;
+      font-size: clamp(18px, 2.2vw, 22px);
+      color: var(--txt);
+    }
+    .row{
+      margin-top: 18px;
+      display:flex; gap: 12px; flex-wrap:wrap; align-items:center;
+    }
+    button{
+      border: 0;
+      border-radius: 12px;
+      padding: 14px 18px;
+      font-size: 16px;
+      font-weight: 800;
+      cursor:pointer;
+      transition: transform .08s ease, filter .15s ease;
+      user-select:none;
+    }
+    button:active{ transform: scale(0.98); }
+    #yes{
+      background: linear-gradient(180deg, #22c55e, #16a34a);
+      color: #06240f;
+      box-shadow: 0 14px 30px rgba(34,197,94,0.25);
+    }
+    #no{
+      background: linear-gradient(180deg, #f43f5e, #e11d48);
+      color: #2b0610;
+      box-shadow: 0 14px 30px rgba(244,63,94,0.22);
+      position: relative;
+    }
+
+    /* Imagen */
+    #minion{
+      width: 140px;
+      display:block;
+      margin: 16px auto 0;
+      border-radius: 14px;
+      box-shadow: 0 18px 50px rgba(0,0,0,0.45);
+      transform: scale(1) rotate(0deg);
+      transition: transform 160ms ease;
+      will-change: transform;
+      position: relative;
+      z-index: 5;
+    }
+
+    /* Confetti */
+    .confetti{
+      position: fixed; inset: 0; pointer-events:none; overflow:hidden; z-index: 1;
+    }
+    .piece{
+      position:absolute;
+      width: 10px; height: 14px;
+      opacity: 0.9;
+      top:-20px;
+      transform: translateY(0) rotate(0deg);
+      animation: fall linear forwards;
+    }
+    @keyframes fall{
+      to{ transform: translateY(110vh) rotate(720deg); }
+    }
+
+    /* Modal */
+    .modal{
+      position: fixed; inset: 0; display:none; place-items:center;
+      background: rgba(0,0,0,0.55);
+      padding: 18px;
+      z-index: 3;
+    }
+    .modal .box{
+      width:min(520px, 92vw);
+      background: rgba(15,23,42,0.92);
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 18px;
+      padding: 20px;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+    }
+    .modal h2{ margin:0 0 6px; }
+    .modal .actions{ margin-top: 14px; display:flex; gap:10px; flex-wrap:wrap; }
+    .ghost{
+      background: rgba(255,255,255,0.08);
+      color: var(--txt);
+      border: 1px solid rgba(255,255,255,0.14);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+    <h1>⚠️ Pregunta extremadamente seria 💘</h1>
+    <p>(por favor responde con madurez y responsabilidad emocional)</p>
+
+    <p class="big">
+      <strong id="name">Lina</strong>, ¿Valentine’s 2026😌😌?
+    </p>
+
+    <img id="minion" src="./minion.jpg" alt="minion" />
+
+    <div class="row">
+      <button id="yes">Sí, obvio 😌💖</button>
+      <button id="no">No 😈</button>
+    </div>
+  </div>
+
+  <div class="confetti" id="confetti"></div>
+
+  <div class="modal" id="modal">
+    <div class="box">
+      <h2>OFICIALMENTE: eres mi Valentine 💘</h2>
+      <p id="msg">Prometo invitarte algo rico y darte muchos abrazos (sin discutir términos y condiciones).</p>
+      <div class="actions">
+        <button class="ghost" id="close">Cerrar</button>
+        <button id="copy">Copiar prueba (para evidencias) 📸</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const novia = "Lina";
+    document.getElementById("name").textContent = novia;
+
+    const noBtn = document.getElementById("no");
+    const yesBtn = document.getElementById("yes");
+    const modal = document.getElementById("modal");
+    const msgEl = document.getElementById("msg");
+    const confetti = document.getElementById("confetti");
+
+    // Imagen que crece
+    const minion = document.getElementById("minion");
+    let minionScale = 1;
+
+    function growMinion() {
+      minionScale = Math.min(6, minionScale + 0.18);
+      const rot = (Math.random() * 8 - 4).toFixed(1);
+      minion.style.transform = `scale(${minionScale}) rotate(${rot}deg)`;
+      setTimeout(() => {
+        minion.style.transform = `scale(${minionScale}) rotate(0deg)`;
+      }, 120);
+    }
+
+    // --- Estado
+    let noTaps = 0;
+    let ninja = false;      // 🔥 se activa en el 3er intento
+    let level = 1;
+    let lastMoveAt = 0;
+
+    const taunts = ["casi 😭","uy por un pixel","demasiado lento 🐢","nunca me atraparás","skill issue"];
+
+    function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
+
+    function shake(ms = 140) {
+      const body = document.body;
+      body.style.transition = "transform 50ms";
+      body.style.transform = "translateX(6px)";
+      setTimeout(() => body.style.transform = "translateX(-6px)", 55);
+      setTimeout(() => body.style.transform = "translateX(0px)", ms);
+    }
+
+    function floatingText(text) {
+      const s = document.createElement("div");
+      s.textContent = text;
+      const r = noBtn.getBoundingClientRect();
+      s.style.position = "fixed";
+      s.style.left = (r.left + 10) + "px";
+      s.style.top = (r.top - 18) + "px";
+      s.style.padding = "6px 10px";
+      s.style.borderRadius = "999px";
+      s.style.fontWeight = "800";
+      s.style.fontSize = "13px";
+      s.style.background = "rgba(0,0,0,0.35)";
+      s.style.border = "1px solid rgba(255,255,255,0.16)";
+      s.style.color = "rgba(229,231,235,0.95)";
+      s.style.backdropFilter = "blur(6px)";
+      s.style.pointerEvents = "none";
+      s.style.zIndex = 9999;
+      s.style.opacity = "1";
+      s.style.transform = "translateY(0px)";
+      s.style.transition = "transform 380ms ease, opacity 380ms ease";
+      document.body.appendChild(s);
+
+      requestAnimationFrame(() => {
+        s.style.transform = "translateY(-18px)";
+        s.style.opacity = "0";
+      });
+
+      setTimeout(() => s.remove(), 450);
+    }
+
+    function popMiniConfetti() {
+      const colors = ["#f43f5e", "#60a5fa", "#fbbf24", "#a78bfa", "#34d399"];
+      const count = 18;
+      for (let i = 0; i < count; i++) {
+        const d = document.createElement("div");
+        d.className = "piece";
+        d.style.left = (Math.random() * 100) + "vw";
+        d.style.background = colors[Math.floor(Math.random() * colors.length)];
+        d.style.animationDuration = (1.1 + Math.random() * 0.9) + "s";
+        d.style.animationDelay = "0s";
+        d.style.borderRadius = Math.random() > 0.65 ? "999px" : "4px";
+        d.style.opacity = "0.85";
+        confetti.appendChild(d);
+        setTimeout(() => d.remove(), 2000);
+      }
+    }
+
+    function popConfetti() {
+      const colors = ["#22c55e", "#60a5fa", "#f43f5e", "#fbbf24", "#a78bfa", "#34d399"];
+      const count = 140;
+      for (let i = 0; i < count; i++) {
+        const d = document.createElement("div");
+        d.className = "piece";
+        d.style.left = Math.random() * 100 + "vw";
+        d.style.background = colors[Math.floor(Math.random() * colors.length)];
+        d.style.animationDuration = (2.2 + Math.random() * 1.8) + "s";
+        d.style.animationDelay = (Math.random() * 0.2) + "s";
+        d.style.transform = `rotate(${Math.random() * 360}deg)`;
+        d.style.borderRadius = Math.random() > 0.6 ? "999px" : "4px";
+        confetti.appendChild(d);
+        setTimeout(() => d.remove(), 4500);
+      }
+    }
+
+    function moveNoButton(force = false) {
+      const now = Date.now();
+      if (!force && now - lastMoveAt < 40) return;
+      lastMoveAt = now;
+
+      const pad = 16;
+      const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+      const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+
+      const rect = noBtn.getBoundingClientRect();
+      const maxX = vw - rect.width - pad;
+      const maxY = vh - rect.height - pad;
+
+      const x = clamp(Math.floor(Math.random() * (maxX - pad + 1)) + pad, pad, maxX);
+      const y = clamp(Math.floor(Math.random() * (maxY - pad + 1)) + pad, pad, maxY);
+
+      noBtn.style.position = "fixed";
+      noBtn.style.left = x + "px";
+      noBtn.style.top = y + "px";
+
+      noBtn.style.transition = "transform 90ms ease";
+      noBtn.style.transform = `scale(${1 + Math.min(0.12, level * 0.01)}) rotate(${(Math.random()*8-4).toFixed(1)}deg)`;
+      setTimeout(() => { noBtn.style.transform = "scale(1) rotate(0deg)"; }, 110);
+    }
+
+    function onAttemptNo() {
+      noTaps++;
+      growMinion(); // ✅ siempre crece al intentar “No”
+
+      // 1er y 2do intento: no se mueve, solo texto
+      if (noTaps === 1) {
+        noBtn.textContent = "Como que no Carenalga! intenta otra vez.";
+        popMiniConfetti();
+        return;
+      }
+      if (noTaps === 2) {
+        noBtn.textContent = "Y mae estas faisty. No lo acepto intenta otra vez.";
+        shake(140);
+        return;
+      }
+
+      // 3er intento: activa ninja y muestra el mensaje exacto
+      if (noTaps === 3) {
+        ninja = true;
+        noBtn.textContent = "Modo ninja activado 🥷";
+        floatingText("se puso serio 😭");
+        popMiniConfetti();
+        // A partir de aquí empieza a huir
+        level = 1 + Math.floor(noTaps / 6);
+        moveNoButton(true);
+        return;
+      }
+
+      // Desde el 4to en adelante: huye siempre
+      if (ninja) {
+        level = 1 + Math.floor(noTaps / 6);
+
+        const pool = [
+          "No 😈",
+          "No acepto esa respuesta 📉",
+          "Reintenta (pero con Sí) 😇",
+          "Nooope 🚫",
+          "Te amo… pero NO 😭"
+        ];
+        noBtn.textContent = pool[noTaps % pool.length];
+
+        if (noTaps % 3 === 0) popMiniConfetti();
+        if (noTaps % 4 === 0) shake(140);
+        if (noTaps % 2 === 0) floatingText(taunts[Math.floor(Math.random() * taunts.length)]);
+
+        moveNoButton(true);
+      }
+    }
+
+    // Desktop: "intento de no" cuando pasas el mouse por encima (solo huye después del 3er intento)
+    noBtn.addEventListener("mouseenter", () => {
+      // Antes del modo ninja, contamos como intento SIN mover
+      if (!ninja) return onAttemptNo();
+      // Ya ninja: huye
+      onAttemptNo();
+    });
+
+    // Modo ninja: huye si te acercas mucho (solo cuando ninja=true)
+    document.addEventListener("mousemove", (e) => {
+      if (!ninja) return;
+      const rect = noBtn.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const dx = e.clientX - cx;
+      const dy = e.clientY - cy;
+      const dist = Math.hypot(dx, dy);
+
+      const fearRadius = 110 + level * 18;
+      if (dist < fearRadius) moveNoButton();
+    });
+
+    // Móvil: tocar el botón cuenta igual
+    noBtn.addEventListener("touchstart", (e) => {
+      e.preventDefault();
+      onAttemptNo();
+    }, { passive: false });
+
+    // Click: si lo logra clickear, cuenta igual
+    noBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      onAttemptNo();
+      if (ninja) floatingText("¿CÓMO? 😳");
+    });
+
+    // Botón “Sí”
+    yesBtn.addEventListener("click", () => {
+      popConfetti();
+      modal.style.display = "grid";
+      const custom = [
+        `Confirmado: Preparate para comer mucho sushi, ponerte sweater y tomar muchas fotos. 💘`,
+      ];
+      msgEl.textContent = custom[Math.floor(Math.random() * custom.length)];
+    });
+
+    document.getElementById("close").addEventListener("click", () => {
+      modal.style.display = "none";
+    });
+
+    document.getElementById("copy").addEventListener("click", async () => {
+      const text = `PRUEBA OFICIAL:\nLina dijo que SÍ a ser mi Valentine 💘\nFecha: ${new Date().toLocaleString("es-CR")}`;
+      try {
+        await navigator.clipboard.writeText(text);
+        alert("Copiado 😌📸 (manda screenshot para evidencias)");
+      } catch {
+        alert("No pude copiar automático, pero igual cuenta 😭💘");
+      }
+    });
+
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) modal.style.display = "none";
+    });
+
+    // Posición inicial (sin huir)
+    // No se mueve al inicio. Solo se mueve a partir del 3er intento.
+  </script>
+</body>
+</html>
